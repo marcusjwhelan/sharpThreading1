@@ -117,7 +117,7 @@ namespace sharpThreading1
     }
     // ****************************************************************************************************
 
-    // Producer Concuser **********************************************************************************
+    // Producer Consumer **********************************************************************************
     public class ProducerConsumerDemo
     {
         private readonly BlockingCollection<string> _cutleriesToWash =

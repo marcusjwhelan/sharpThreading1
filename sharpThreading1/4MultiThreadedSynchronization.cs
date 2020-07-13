@@ -26,6 +26,11 @@ using System.Threading.Tasks;
 namespace sharpThreading1
 {
     // reader writer lock slim extension ************************************************************
+    /*
+     * ReaderWriterLockSlim allows one thread to lock writing while other threads can still read
+     * 
+     * locks on a resource of a class. within methods.
+     */
     public static class ReaderWriterLockSlimExt
     {
         public static ReaderLockSlimWrapper TakeReaderLock(this ReaderWriterLockSlim rwlock, TimeSpan timeout)
@@ -131,6 +136,16 @@ namespace sharpThreading1
         }
     }
     //**********************************************************************************************
+    // Monitor  ************************************************************************************
+    /*
+     * Monitor.Enter(_sync) will lock the method to this thread till Monitor.Exit(_sync) although this is bad
+     * an exception could occur so use the example below with "Monitor.TryEnter(_sync, TimeSpan.FromSeconds(10), ref lockTaken);"
+     * This is all in a try catch so you can get exceptions
+     * 
+     * 
+     * The lock above is being used in the methods below in the "using(_sync.Loc(TimeSpan.FromSeconds(3)) {}"
+     * or without the timeout "lock (S_
+     */
     public class BankCard
     {
         private decimal _moneyAmount;
@@ -138,13 +153,14 @@ namespace sharpThreading1
         private decimal _credit;
 
         // using reader writer lock slim = useful when you application doesn't want to block readers
-        // but still want to write. ALos good if most threads are reading
+        // but still want to write. Also good if most threads are reading
         private ReaderWriterLockSlim _rwLock = new ReaderWriterLockSlim(); // does not allow recursion
 
         public BankCard(decimal moneyAmount)
         {
             _moneyAmount = moneyAmount;
         }
+        // using the reader writer lock instead
         public decimal TotalMoneyAmount
         {
             // with read write lock slim extension
@@ -228,6 +244,8 @@ namespace sharpThreading1
 
             // below is without extension and struct
             /*bool lockTaken = false;
+             * Monitor.Enter(_sync) will take ownership of the sync lock for this thread for the entirety of the lock.
+             * makes the full method locked to this thread. other threads cannot execute this method
             try
             {
                 Monitor.Enter(_sync);
@@ -239,11 +257,12 @@ namespace sharpThreading1
             {
                 if (lockTaken)
                 {
-                    Monitor.Exit(_sync);
+                    Monitor.Exit(_sync); // finally exit the lock of them method
                 }
             }*/
         }
-    }
+    }    
+    // ********************************************************************************************
 
     class MultiThreadedSynchronization
     {
@@ -339,8 +358,10 @@ namespace sharpThreading1
         */
         public class Character
         {
+            // backing fields            
             private int _armor;
             private int _health = 100;
+            // primitives
             public int Health { 
                 get => _health;
                 private set => _health = value;
@@ -364,7 +385,7 @@ namespace sharpThreading1
             {
                 if (isPositive)
                 {
-                    Interlocked.Increment(ref _armor);
+                    Interlocked.Increment(ref _armor); // Interlocked is a multithreaded synchronization primitive
                     // Armor++;// not atomic
                 }
                 else
@@ -403,5 +424,6 @@ namespace sharpThreading1
             Console.WriteLine($"Resulting armor = {c.Armor}");
             Console.Read();
         }
+        /* ---------------------------------------------------------------------------*/
     }
 }
